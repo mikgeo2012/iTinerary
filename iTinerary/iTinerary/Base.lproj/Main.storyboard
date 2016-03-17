@@ -10,7 +10,6 @@
         <scene sceneID="pY4-Hu-kfo">
             <objects>
                 <navigationController title="Master" id="RMx-3f-FxP" sceneMemberID="viewController">
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <navigationBar key="navigationBar" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="Pmd-2v-anx">
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
@@ -26,15 +25,23 @@
         <scene sceneID="yUG-lL-AsK">
             <objects>
                 <viewController title="Detail" id="JEX-9P-axG" customClass="DetailViewController" customModule="iTinerary" customModuleProvider="target" sceneMemberID="viewController">
-                    <mapView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" id="U3i-eS-hc8">
+                    <mapView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" id="lWz-U0-6q8">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <connections>
+                            <outlet property="delegate" destination="JEX-9P-axG" id="qzh-Da-ncU"/>
+                        </connections>
                     </mapView>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="Detail" id="mOI-FS-AaM"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+                    <navigationItem key="navigationItem" id="mOI-FS-AaM">
+                        <barButtonItem key="rightBarButtonItem" systemItem="search" id="K79-qk-m7W">
+                            <connections>
+                                <action selector="showSearchBar:" destination="JEX-9P-axG" id="aix-9E-fB2"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
-                        <outlet property="overviewMap" destination="U3i-eS-hc8" id="2fJ-dy-b16"/>
+                        <outlet property="mapView" destination="lWz-U0-6q8" id="dgV-C8-FB1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FJe-Yq-33r" sceneMemberID="firstResponder"/>
@@ -71,11 +78,11 @@
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Start:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8ib-eW-xlm">
                                     <rect key="frame" x="13" y="0.0" width="295" height="37"/>
                                     <fontDescription key="fontDescription" name="Kailasa" family="Kailasa" pointSize="20"/>
-                                    <color key="textColor" red="1" green="0.57157303793465386" blue="0.28328573429457882" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="textColor" red="0.021376224951628227" green="0.63952608398834077" blue="0.78439503205128203" alpha="1" colorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                             </subviews>
-                            <color key="backgroundColor" red="0.54040464743589745" green="0.20596918664911532" blue="0.48503303842034795" alpha="0.75476831896551722" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.45710983056826943" green="0.84881810897435894" blue="0.81948466191819169" alpha="0.61637931034482762" colorSpace="calibratedRGB"/>
                             <constraints>
                                 <constraint firstItem="8ib-eW-xlm" firstAttribute="top" secondItem="ecv-oF-NVg" secondAttribute="topMargin" id="0NZ-yz-5A1"/>
                                 <constraint firstItem="8ib-eW-xlm" firstAttribute="leading" secondItem="ecv-oF-NVg" secondAttribute="leading" constant="15" id="Gmv-u6-Ozz"/>
@@ -95,12 +102,13 @@
                                             <rect key="frame" x="15" y="0.0" width="345" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <color key="textColor" red="0.94184695512820515" green="0.0037189652791237418" blue="0.45457547272220122" alpha="1" colorSpace="calibratedRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" red="0.85130920016353784" green="1" blue="0.82621065259714932" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
                                     <segue destination="vC3-pB-5Vb" kind="showDetail" identifier="showDetail" id="6S0-TO-JiA"/>
                                 </connections>
@@ -112,8 +120,17 @@
                             <outlet property="delegate" destination="7bK-jq-Zjz" id="RA6-mI-bju"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Vacation Stops" id="Zdf-7t-Un8"/>
+                    <navigationItem key="navigationItem" title="Itinerary" id="Zdf-7t-Un8">
+                        <barButtonItem key="rightBarButtonItem" systemItem="search" id="8XV-02-5M3">
+                            <connections>
+                                <action selector="showSearchBar:" destination="7bK-jq-Zjz" id="x4C-R3-H1g"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="vaY-OZ-sLw">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </refreshControl>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rux-fX-hf1" sceneMemberID="firstResponder"/>
             </objects>
@@ -123,8 +140,7 @@
         <scene sceneID="r7l-gg-dq7">
             <objects>
                 <navigationController id="vC3-pB-5Vb" sceneMemberID="viewController">
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
-                    <navigationBar key="navigationBar" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="DjV-YW-jjY">
+                    <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" alpha="0.20000000000000001" contentMode="scaleToFill" id="DjV-YW-jjY">
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>

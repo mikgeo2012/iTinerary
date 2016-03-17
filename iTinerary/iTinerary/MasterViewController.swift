@@ -8,12 +8,19 @@
 
 import UIKit
 import CoreLocation
+import MapKit
 
-class MasterViewController: UIViewController, UITableViewController {
+class MasterViewController: UITableViewController, UISearchBarDelegate {
 
     var detailViewController: DetailViewController? = nil
     
     var travelLocations = [travelLocation]()
+    
+    var searchController:UISearchController!
+    var localSearchRequest:MKLocalSearchRequest!
+    var localSearch:MKLocalSearch!
+    var localSearchResponse:MKLocalSearchResponse!
+    var error:NSError!
 
 
     override func viewDidLoad() {
@@ -28,25 +35,46 @@ class MasterViewController: UIViewController, UITableViewController {
             self.detailViewController = (controllers[controllers.count-1] as! UINavigationController).topViewController as? DetailViewController
         }
         
-        let start = travelLocation(stopName: "Home", coordinate: Point(42.48, -83.49), travelIndex: 1)
-        let s1 = travelLocation(city: "Nashville", state: "TN", country: "USA", coordinate: Point(36.16, -86.78), travelIndex: 2)
-        let s2 = travelLocation(stopName: "Grandma's House", coordinate: Point(35.60, -92.87), travelIndex: 3)
-        let s3 = travelLocation(city: "Salt Lake City", state: "UT", country: "USA", coordinate: Point(40.75, -111.94), travelIndex: 4)
+        let start = travelLocation(stopName: "Home", coordinate: Point(42.48, -83.49))
+        let s1 = travelLocation(city: "Nashville", state: "TN", country: "USA", coordinate: Point(36.16, -86.78))
+        s1.addViewLocation("Tennessee Museum", description: "Hopefully go here on the first day", address: "505 Deaderick St", coordinate: Point(36.1646, -86.7819))
+        s1.addSleepLocation("Hampton Inn", address: "310 4th Ave S", nights: 1, coordinate: Point(36.1574, -86.7746))
+        s1.addViewLocation("Visual Arts Center", description: "Bought tickets already", address: "919 Broadway St.", coordinate: Point(36.1575, -86.7838))
+        s1.addSleepLocation("Hotel Indigo", address: "301 Union St", nights: 1, coordinate: Point(36.1652, -86.7797))
+        s1.addViewLocation("12th & Porter", description: "Make reservations before going", address: "114 12th Ave N", coordinate: Point(36.1579, -86.7881))
+        let s2 = travelLocation(stopName: "Grandma's House", coordinate: Point(35.60, -92.87))
+        let s3 = travelLocation(city: "Salt Lake City", state: "UT", country: "USA", coordinate: Point(40.75, -111.94))
         
         travelLocations.append(start)
         travelLocations.append(s1)
         travelLocations.append(s2)
         travelLocations.append(s3)
+        
+        self.refreshControl?.addTarget(self, action: "refreshTable", forControlEvents:UIControlEvents.ValueChanged)
     }
 
     override func viewWillAppear(animated: Bool) {
         self.clearsSelectionOnViewWillAppear = self.splitViewController!.collapsed
         super.viewWillAppear(animated)
     }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        let value = UIInterfaceOrientation.Portrait.rawValue
+        UIDevice.currentDevice().setValue(value, forKey: "orientation")
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    func refreshTable() {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.tableView.reloadData()
+        })
+        
+        //self.refreshControl?.endRefreshing()
     }
 
     /*func insertNewObject(sender: AnyObject) {
@@ -82,6 +110,66 @@ class MasterViewController: UIViewController, UITableViewController {
     }))
     }*/
     
+    
+    @IBAction func showSearchBar(sender: AnyObject) {
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.hidesNavigationBarDuringPresentation = false
+        self.searchController.searchBar.delegate = self
+        presentViewController(searchController, animated: true, completion: nil)
+        
+    }
+    
+    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        dismissViewControllerAnimated(true, completion: nil)
+        
+        localSearchRequest = MKLocalSearchRequest()
+        localSearchRequest.naturalLanguageQuery = searchBar.text
+        localSearch = MKLocalSearch(request: localSearchRequest)
+        localSearch.startWithCompletionHandler { (localSearchResponse, error) -> Void in
+            
+            if localSearchResponse == nil{
+                let alertController = UIAlertController(title: nil, message: "Place Not Found", preferredStyle: UIAlertControllerStyle.Alert)
+                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default, handler: nil))
+                self.presentViewController(alertController, animated: true, completion: nil)
+                return
+            }
+            
+            let newStopTitle = searchBar.text
+            let newStopCoord = CLLocationCoordinate2D(latitude: localSearchResponse!.boundingRegion.center.latitude, longitude: localSearchResponse!.boundingRegion.center.longitude)
+            let newStop = travelLocation(stopName: newStopTitle!, mapCoordinate: newStopCoord)
+            self.travelLocations.append(newStop)
+            self.refreshTable()
+        }
+        
+        
+            
+    }
+    
+     /*func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        localSearchRequest = MKLocalSearchRequest()
+        localSearchRequest.naturalLanguageQuery = searchText
+        localSearch = MKLocalSearch(request: localSearchRequest)
+        localSearch.startWithCompletionHandler { (localSearchResponse, error) -> Void in
+            
+            if localSearchResponse == nil{
+                let alertController = UIAlertController(title: nil, message: "Place Not Found", preferredStyle: UIAlertControllerStyle.Alert)
+                alertController.addAction(UIAlertAction(title: "Dismiss", style: UIAlertActionStyle.Default, handler: nil))
+                self.presentViewController(alertController, animated: true, completion: nil)
+                return
+            }
+            
+            let newStopTitle = searchText
+            let newStopCoord = CLLocationCoordinate2D(latitude: localSearchResponse!.boundingRegion.center.latitude, longitude: localSearchResponse!.boundingRegion.center.longitude)
+            let newStop = travelLocation(stopName: newStopTitle, mapCoordinate: newStopCoord)
+            self.travelLocations.append(newStop)
+        }
+
+    }*/
+    
+    
+    
 
     // MARK: - Segues
 
@@ -113,6 +201,8 @@ class MasterViewController: UIViewController, UITableViewController {
         
         let stop = travelLocations[indexPath.row]
         cell.textLabel?.text = stop.name
+        cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+        cell.showsReorderControl = true
         return cell
     }
 
@@ -120,15 +210,33 @@ class MasterViewController: UIViewController, UITableViewController {
         // Return false if you do not want the specified item to be editable.
         return true
     }
+    
+    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+        
+        if (destinationIndexPath.row < sourceIndexPath.row) {
+            let movingStop = travelLocations[sourceIndexPath.row]
+            for i in sourceIndexPath.row.stride(to: destinationIndexPath.row, by: -1) {
+                travelLocations[i] = travelLocations[i-1]
+            }
+            travelLocations[destinationIndexPath.row] = movingStop
+        } else if (destinationIndexPath.row > sourceIndexPath.row) {
+            let movingStop = travelLocations[sourceIndexPath.row]
+            for i in sourceIndexPath.row.stride(to: destinationIndexPath.row, by: 1) {
+                travelLocations[i] = travelLocations[i+1]
+            }
+            travelLocations[destinationIndexPath.row] = movingStop
+        }
 
-    /*override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    }
+
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
             travelLocations.removeAtIndex(indexPath.row)
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         } else if editingStyle == .Insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
         }
-    }*/
+    }
 
 
 }

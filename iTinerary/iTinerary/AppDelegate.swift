@@ -22,9 +22,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         splitViewController.delegate = self
         
         
-        UINavigationBar.appearance().barTintColor = UIColor(red: 0.41, green: 0.39, blue: 0.39, alpha: 0.9)
-        UINavigationBar.appearance().tintColor = UIColor(red: 0.74, green: 0.74, blue: 0.74, alpha: 1.0)
-
+        UINavigationBar.appearance().barTintColor = UIColor(red: 67.0/255.0, green: 205.0/255.0, blue: 135.0/255.0, alpha: 1.0)
+        //UINavigationBar.appearance().tintColor = UIColor(red: 0.0, green: 0.3, blue: 0.6, alpha: 1.0)
+        UISearchBar.appearance().barTintColor = UIColor(red: 67.0/255.0, green: 205.0/255.0, blue: 135.0/255.0, alpha: 1.0)
+        UISearchBar.appearance().tintColor = UIColor.whiteColor()
+        UITextField.appearanceWhenContainedInInstancesOfClasses([UISearchBar.self]).tintColor = UIColor(red: 67.0/255.0, green: 205.0/255.0, blue: 135.0/255.0, alpha: 1.0)
         
         
         return true
@@ -63,6 +65,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         }
         return false
     }
+    
+    /*func splitViewControllerPreferredInterfaceOrientationForPresentation(splitViewController: UISplitViewController) -> UIInterfaceOrientation {
+        let navigationController = splitViewController.presentedViewController as? UINavigationController
+        if let _ = navigationController?.topViewController as? DetailViewController {
+            return UIInterfaceOrientation.LandscapeLeft
+        } else {
+            return UIInterfaceOrientation.Portrait
+        }
+    }*/
 
 }
 
