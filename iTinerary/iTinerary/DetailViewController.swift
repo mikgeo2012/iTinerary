@@ -8,8 +8,9 @@
 
 import UIKit
 import MapKit
+import Contacts
 
-class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDelegate {
+class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDelegate, UIPopoverPresentationControllerDelegate {
 
     // MARK: - Properties
     
@@ -20,6 +21,10 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
     var localSearch:MKLocalSearch!
     var localSearchResponse:MKLocalSearchResponse!
     var error:NSError!
+    var isNewSight: Bool = false
+    var isNewSleep: Bool = false
+    var newSleepNumNights = 0
+    var newSightDesc = ""
     
     var detailItem: travelLocation? {
         didSet {
@@ -55,6 +60,10 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
         super.viewDidLoad()
         self.configureView()
         // Do any additional setup after loading the view, typically from a nib.
+        var longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
+        longPress.minimumPressDuration = 0.8
+        mapView!.addGestureRecognizer(longPress)
+        
         self.mapView?.delegate = self
         self.mapView?.showsScale = true
         
@@ -70,11 +79,74 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
     
     // MARK: - Methods
     
-    @IBAction func showSearchBar(sender: AnyObject) {
+    /*@IBAction func showSearchBar(sender: AnyObject) {
+        
         searchController = UISearchController(searchResultsController: nil)
         searchController.hidesNavigationBarDuringPresentation = false
         self.searchController.searchBar.delegate = self
-        presentViewController(searchController, animated: true, completion: nil)
+        
+        let alertController = UIAlertController(title: "New Point of Interest", message: "Select which type of location you are trying to add.", preferredStyle: .Alert)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+            NSLog("Cancel pressed")
+        }
+        alertController.addAction(cancelAction)
+        
+        let SightAction = UIAlertAction(title: "New Sight", style: .Default) { (action) in
+            var tfield: UITextField!
+            
+            let newAlertController = UIAlertController(title: "Add Description", message: nil, preferredStyle: .Alert)
+            newAlertController.addTextFieldWithConfigurationHandler { (textfield: UITextField!) in
+                textfield.placeholder = "Add a note or description"
+                textfield.keyboardType = .Default
+                tfield = textfield
+                
+            }
+            let newCancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                NSLog("Cancel pressed")
+            }
+            newAlertController.addAction(newCancelAction)
+            let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                self.isNewSleep = false
+                self.isNewSight = true
+                self.newSightDesc = tfield.text!
+                self.presentViewController(self.searchController, animated: true, completion: nil)
+            }
+            newAlertController.addAction(newOKAction)
+            self.presentViewController(newAlertController, animated: true, completion: nil)
+        }
+        alertController.addAction(SightAction)
+        
+        let SleepAction = UIAlertAction(title: "New Accommodation", style: .Default) { (action) in
+            
+            var tfield: UITextField!
+            
+            let newAlertController = UIAlertController(title: "Number of nights?", message: nil, preferredStyle: .Alert)
+            newAlertController.addTextFieldWithConfigurationHandler { (textfield: UITextField!) in
+                textfield.placeholder = ""
+                textfield.keyboardType = .NumberPad
+                tfield = textfield
+                
+            }
+            let newCancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                NSLog("Cancel pressed")
+            }
+            newAlertController.addAction(newCancelAction)
+            let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                self.isNewSleep = true
+                self.isNewSight = false
+                self.newSleepNumNights = Int(tfield.text!)!
+                self.presentViewController(self.searchController, animated: true, completion: nil)
+            }
+            newAlertController.addAction(newOKAction)
+            self.presentViewController(newAlertController, animated: true, completion: nil)
+            
+        }
+        alertController.addAction(SleepAction)
+        
+        presentViewController(alertController, animated: true, completion: nil)
+        
+        
     }
     
     
@@ -94,16 +166,188 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
                 return
             }
             
-            let newStopTitle = searchBar.text
-            let newStopCoord = CLLocationCoordinate2D(latitude: localSearchResponse!.boundingRegion.center.latitude, longitude: localSearchResponse!.boundingRegion.center.longitude)
-            //let newStop = travelLocation(stopName: newStopTitle!, mapCoordinate: newStopCoord)
-            //self.travelLocations.append(newStop)
+            if (self.isNewSight) {
+                let name = localSearchResponse?.mapItems[0].placemark.name
+                let addr = localSearchResponse?.mapItems[0].placemark.addressDictionary![CNPostalAddressStreetKey] as? String
+                let newStopCoord = CLLocationCoordinate2D(latitude: localSearchResponse!.boundingRegion.center.latitude, longitude: localSearchResponse!.boundingRegion.center.longitude)
+                print(name)
+                print("\(newStopCoord.latitude), \(newStopCoord.longitude)")
+                self.detailItem?.addViewLocation(name!, description: self.newSightDesc, address: addr, mapCoordinate: newStopCoord)
+            } else {
+                let name = localSearchResponse?.mapItems[0].placemark.name
+                let addr = localSearchResponse?.mapItems[0].placemark.addressDictionary![CNPostalAddressStreetKey] as? String
+                let newStopCoord = CLLocationCoordinate2D(latitude: localSearchResponse!.boundingRegion.center.latitude, longitude: localSearchResponse!.boundingRegion.center.longitude)
+                print(name)
+                print("\(newStopCoord.latitude), \(newStopCoord.longitude)")
+                self.detailItem?.addSleepLocation(name!, address: addr, nights: self.newSleepNumNights, mapCoordinate: newStopCoord)
+            }
             
+            self.detailItem?.printLocations()
+            self.addAnnotationsToMap(self.detailItem!)
+            self.mapView?.showAnnotations((self.mapView?.annotations)!, animated: true)
         }
         
         
         
     }
+    
+    */func dropPin(gestureRecognizer: UIGestureRecognizer) {
+        var touchPoint = gestureRecognizer.locationInView(self.mapView)
+        var newCoordinates = self.mapView!.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
+        print(newCoordinates)
+        
+        var addr = "No address found"
+        
+        CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude), completionHandler: {(placemarks, error) -> Void in
+            if error != nil {
+                print("Reverse geocoder failed with error" + error!.localizedDescription)
+                return
+            }
+            
+            if placemarks!.count > 0 {
+                let pm = placemarks![0]
+                
+                if (pm.thoroughfare != nil) && (pm.subThoroughfare != nil) {
+                    addr = pm.subThoroughfare! + " " + pm.thoroughfare!
+                } else if (pm.thoroughfare != nil) {
+                    addr = pm.thoroughfare!
+                }
+                
+                print(addr)
+            }
+            
+        
+        let annotation = viewAnnotation(title: "test", description: "test test", address: addr, coordinate: newCoordinates)
+        self.mapView!.addAnnotation(annotation)
+        })
+    }
+    /*
+        
+        let alertController = UIAlertController(title: "New Point of Interest", message: "Select which type of location you are trying to add.", preferredStyle: .Alert)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+            NSLog("Cancel pressed")
+        }
+        alertController.addAction(cancelAction)
+        
+        let SightAction = UIAlertAction(title: "New Sight", style: .Default) { (action) in
+            var tfield: UITextField!
+            var tfield2: UITextField!
+            
+            let newAlertController = UIAlertController(title: "Add New Sight", message: nil, preferredStyle: .Alert)
+            newAlertController.addTextFieldWithConfigurationHandler { (textfield: UITextField!) in
+                textfield.placeholder = "Add a name"
+                textfield.keyboardType = .Default
+                tfield2 = textfield
+                
+            }
+            newAlertController.addTextFieldWithConfigurationHandler { (textfield: UITextField!) in
+                textfield.placeholder = "Add a note or description"
+                textfield.keyboardType = .Default
+                tfield = textfield
+                
+            }
+            let newCancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                NSLog("Cancel pressed")
+            }
+            newAlertController.addAction(newCancelAction)
+            let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                self.isNewSleep = false
+                self.isNewSight = true
+                self.newSightDesc = tfield.text!
+                
+                let tempCoords = gestureRecognizer.locationInView(self.mapView)
+                let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
+                
+                var addr = ""
+                
+                CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoords!.latitude, longitude: newCoords!.longitude), completionHandler: {(placemarks, error) -> Void in
+                    if error != nil {
+                        print("Reverse geocoder failed with error" + error!.localizedDescription)
+                        return
+                    }
+                    
+                    if placemarks!.count > 0 {
+                        let pm = placemarks![0] 
+                        
+                        if (pm.thoroughfare != nil) && (pm.subThoroughfare != nil) {
+                            addr = pm.subThoroughfare! + " " + pm.thoroughfare!
+                        } else if (pm.thoroughfare != nil) {
+                            addr = pm.thoroughfare!
+                        } else {
+                            addr = "No address found"
+                        }
+                        
+                        print(addr)
+                    }
+                    else {
+                        addr = "No address found"
+                    }
+                
+                })
+                
+            
+            self.detailItem?.addViewLocation(tfield2.text!, description: tfield.text!, address: addr, mapCoordinate: newCoords!)
+                
+            let newAnnotation = viewAnnotation(title: tfield2.text!, description: tfield.text!, address: addr, coordinate: newCoords!)
+            self.addAnnotationToMap(newAnnotation)
+            //self.detailItem?.printLocations()
+                
+            }
+            newAlertController.addAction(newOKAction)
+            self.presentViewController(newAlertController, animated: true, completion: nil)
+        }
+        alertController.addAction(SightAction)
+        
+        let SleepAction = UIAlertAction(title: "New Accommodation", style: .Default) { (action) in
+            
+            var tfield: UITextField!
+            var tfield2: UITextField!
+            
+            let newAlertController = UIAlertController(title: "Add New Accommodation", message: nil, preferredStyle: .Alert)
+            newAlertController.addTextFieldWithConfigurationHandler { (textfield: UITextField!) in
+                textfield.placeholder = "Add a name"
+                textfield.keyboardType = .Default
+                tfield2 = textfield
+                
+            }
+            newAlertController.addTextFieldWithConfigurationHandler { (textfield: UITextField!) in
+                textfield.placeholder = "Number of nights?"
+                textfield.keyboardType = .NumberPad
+                tfield = textfield
+                
+            }
+            let newCancelAction = UIAlertAction(title: "Cancel", style: .Cancel) { (action) in
+                NSLog("Cancel pressed")
+            }
+            newAlertController.addAction(newCancelAction)
+            let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                self.isNewSleep = true
+                self.isNewSight = false
+                self.newSleepNumNights = Int(tfield.text!)!
+                
+            }
+            newAlertController.addAction(newOKAction)
+            self.presentViewController(newAlertController, animated: true, completion: nil)
+            
+        }
+        alertController.addAction(SleepAction)
+        
+        presentViewController(alertController, animated: true, completion: nil)
+
+        
+    }
+    
+    func addFromTouch(gestureRecognizer: UIGestureRecognizer, annotation: MKAnnotation) {
+        let tapPoint: CGPoint = gestureRecognizer.locationInView(mapView)
+        let touchMapCoordinate: CLLocationCoordinate2D = mapView!.convertPoint(tapPoint, toCoordinateFromView: mapView)
+        
+        if UIGestureRecognizerState.Began == gestureRecognizer.state {
+            let pin = MKPointAnnotation()
+            pin.coordinate = touchMapCoordinate
+            mapView!.addAnnotation(pin)
+        }
+    }*/
     
     func centerMapOnRegion(location: CLLocationCoordinate2D, mapSpan: Double) {
         let tempSpan = MKCoordinateSpanMake(mapSpan, mapSpan)
@@ -146,13 +390,30 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
             if (!sleepLocations.isEmpty) {
                 var annotations = [MKAnnotation]()
                 for s in sleepLocations {
-                    let annotation = sleepAnnotation(title: s.name!, nights: String(s.nights), address: s.address!, coordinate: s.mapCoordinate!)
+                    print(s.name)
+                    let annotation = sleepAnnotation(title: s.name!, nights: String(s.nights), address: s.address, coordinate: s.mapCoordinate!)
                     annotations.append(annotation)
                 }
                 mapView?.addAnnotations(annotations)
             }
             return true
         }
+        return false
+    }
+    
+    func addAnnotationToMap(annotation: MKAnnotation) -> Bool {
+        if let viewAnn = annotation as? viewAnnotation {
+            print(viewAnn.title)
+            mapView?.addAnnotation(viewAnn)
+            return true
+        }
+        
+        if let sleepAnn = annotation as? sleepAnnotation {
+            print(sleepAnn.title)
+            mapView?.addAnnotation(sleepAnn)
+            return true
+        }
+        
         return false
     }
     
@@ -197,18 +458,31 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
         
     }
 
-    /*func mapView(mapView: MKMapView, annotationView view: MKAnnotationView,
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView,
         calloutAccessoryControlTapped control: UIControl) {
-            if let location = view.annotation as? viewAnnotation {
-                let launchOptions = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
-                location.mapItem().openInMapsWithLaunchOptions(launchOptions)
-            } else if let location = view.annotation as? sleepAnnotation {
-                let launchOptions = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
-                location.mapItem().openInMapsWithLaunchOptions(launchOptions)
+            if control == view.rightCalloutAccessoryView {
+                if let sightView = view.annotation as? viewAnnotation {
+                    let tempPoint = self.mapView?.convertCoordinate(sightView.coordinate, toPointToView: nil)
+                    let newOrigin = CGPoint(x: (tempPoint?.x)!, y: (tempPoint?.y)!+40)
+                    var newView = UILabel(frame: CGRect(origin: newOrigin, size: CGSize(width: 20, height: 20)))
+                    newView.text = sightView.locationName
+                    
+                    let addrViewController = UIViewController()
+                    addrViewController.modalPresentationStyle = .Popover
+                    addrViewController.view = newView
+                    addrViewController.preferredContentSize = CGSizeMake(20, 20)
+                    
+                    let popoverAddrViewController = addrViewController.popoverPresentationController
+                    popoverAddrViewController?.permittedArrowDirections = .Any
+                    popoverAddrViewController?.delegate = self
+                    self.navigationController?.pushViewController(addrViewController, animated: true)
+
+                }
+                
             }
             
             
-    }*/
+    }
     
 }
 

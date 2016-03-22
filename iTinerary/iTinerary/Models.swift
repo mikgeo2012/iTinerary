@@ -36,7 +36,7 @@ struct viewLocation {
     
     var name: String
     var description: String
-    var address: String
+    var address: String?
     var coordinate: Point
     var mapCoordinate: CLLocationCoordinate2D?
     
@@ -82,11 +82,11 @@ func ==(lhs: viewLocation, rhs: viewLocation) -> Bool {
 class viewAnnotation: NSObject, MKAnnotation {
     let title: String?
     let subtitle: String?
-    let locationName: String
+    let locationName: String?
     let coordinate: CLLocationCoordinate2D
     
     
-    init(title: String, description subtitle: String, address locationName: String, coordinate: CLLocationCoordinate2D) {
+    init(title: String, description subtitle: String, address locationName: String?=nil, coordinate: CLLocationCoordinate2D) {
         self.title = title
         self.locationName = locationName
         self.coordinate = coordinate
@@ -96,7 +96,7 @@ class viewAnnotation: NSObject, MKAnnotation {
     }
     
     func mapItem() -> MKMapItem {
-        let addressDictionary = [String(CNPostalAddressStreetKey): locationName as AnyObject]
+        let addressDictionary = [String(CNPostalAddressStreetKey): locationName as! AnyObject]
         let placemark = MKPlacemark(coordinate: coordinate, addressDictionary: addressDictionary)
         
         let mapItem = MKMapItem(placemark: placemark)
@@ -110,11 +110,11 @@ class viewAnnotation: NSObject, MKAnnotation {
 class sleepAnnotation: NSObject, MKAnnotation {
     let title: String?
     let subtitle: String?
-    let locationName: String
+    let locationName: String?
     let coordinate: CLLocationCoordinate2D
     
     
-    init(title: String, nights subtitle: String, address locationName: String, coordinate: CLLocationCoordinate2D) {
+    init(title: String, nights subtitle: String, address locationName: String?=nil, coordinate: CLLocationCoordinate2D) {
         self.title = title
         self.locationName = locationName
         self.subtitle = subtitle + " night(s)"
@@ -125,7 +125,7 @@ class sleepAnnotation: NSObject, MKAnnotation {
     }
     
     func mapItem() -> MKMapItem {
-        let addressDictionary = [String(CNPostalAddressStreetKey): locationName as AnyObject]
+        let addressDictionary = [String(CNPostalAddressStreetKey): locationName as! AnyObject]
         let placemark = MKPlacemark(coordinate: coordinate, addressDictionary: addressDictionary)
         
         let mapItem = MKMapItem(placemark: placemark)
@@ -195,19 +195,41 @@ class travelLocation {
     // MARK: - Methods
     
     func addViewLocation(name: String, description: String, address: String? = nil, coordinate: Point) {
-        let newViewLocation = viewLocation(name: name, description: description, address: address!,coordinate: coordinate, mapCoordinate: convertPointToMapCoord(coordinate))
-        viewLocations.append(newViewLocation)
+        let newViewLocation = viewLocation(name: name, description: description, address: address,coordinate: coordinate, mapCoordinate: convertPointToMapCoord(coordinate))
+        self.viewLocations.append(newViewLocation)
+    }
+    
+    func addViewLocation(name: String, description: String, address: String? = nil, mapCoordinate: CLLocationCoordinate2D) {
+        let newViewLocation = viewLocation(name: name, description: description, address: address,coordinate: Point(mapCoordinate.latitude, mapCoordinate.longitude), mapCoordinate: mapCoordinate)
+        self.viewLocations.append(newViewLocation)
     }
     
     func addSleepLocation(name: String, address: String? = nil, nights: Int, coordinate: Point) {
         
         let newSleepLocation = sleepLocation(name: name, address: address, nights: nights, coordinate:coordinate, mapCoordinate: convertPointToMapCoord(coordinate))
-        sleepLocations.append(newSleepLocation)
+        self.sleepLocations.append(newSleepLocation)
+        
+    }
+    
+    
+    func addSleepLocation(name: String, address: String? = nil, nights: Int, mapCoordinate: CLLocationCoordinate2D) {
+        
+        let newSleepLocation = sleepLocation(name: name, address: address, nights: nights, coordinate: Point(mapCoordinate.latitude, mapCoordinate.longitude), mapCoordinate: mapCoordinate)
+        self.sleepLocations.append(newSleepLocation)
         
     }
     
     func convertPointToMapCoord(coordinate: Point) -> CLLocationCoordinate2D{
         return CLLocationCoordinate2D(latitude: CLLocationDegrees(coordinate.lat), longitude: CLLocationDegrees(coordinate.long))
+    }
+    
+    func printLocations() {
+        for v in viewLocations {
+            print(v.name)
+        }
+        for s in sleepLocations {
+            print(s.name)
+        }
     }
     
     

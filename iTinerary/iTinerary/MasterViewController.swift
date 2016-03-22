@@ -36,6 +36,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
         }
         
         let start = travelLocation(stopName: "Home", coordinate: Point(42.48, -83.49))
+        start.addViewLocation("Emagine Novi", description: "Movie", address: "test", coordinate: Point(42.4909, -83.4859))
         let s1 = travelLocation(city: "Nashville", state: "TN", country: "USA", coordinate: Point(36.16, -86.78))
         s1.addViewLocation("Tennessee Museum", description: "Hopefully go here on the first day", address: "505 Deaderick St", coordinate: Point(36.1646, -86.7819))
         s1.addSleepLocation("Hampton Inn", address: "310 4th Ave S", nights: 1, coordinate: Point(36.1574, -86.7746))
