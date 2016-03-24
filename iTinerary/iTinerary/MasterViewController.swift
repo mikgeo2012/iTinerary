@@ -37,11 +37,13 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
         
         let start = travelLocation(stopName: "Home", coordinate: Point(42.48, -83.49))
         start.addViewLocation("Emagine Novi", description: "Movie", address: "test", coordinate: Point(42.4909, -83.4859))
+        start.addViewLocation("Ajishin restaurant", description: "Reservations on monday for 2", address: "42270 Grand River Ave", coordinate: Point(42.4790, -83.4631))
+        start.addSleepLocation("Residence Inn Detroit Novi", address: "27477 Cabaret Dr", nights: "2", coordinate: Point(42.4925, -83.4878))
         let s1 = travelLocation(city: "Nashville", state: "TN", country: "USA", coordinate: Point(36.16, -86.78))
-        s1.addViewLocation("Tennessee Museum", description: "Hopefully go here on the first day", address: "505 Deaderick St", coordinate: Point(36.1646, -86.7819))
-        s1.addSleepLocation("Hampton Inn", address: "310 4th Ave S", nights: 1, coordinate: Point(36.1574, -86.7746))
+        s1.addViewLocation("Tennessee Museum", description: "Hopefully go here on the first day", address:  "505 Deaderick St", coordinate: Point(36.1646, -86.7819))
+        s1.addSleepLocation("Hampton Inn", address: "310 4th Ave S", nights: "1", coordinate: Point(36.1574, -86.7746))
         s1.addViewLocation("Visual Arts Center", description: "Bought tickets already", address: "919 Broadway St.", coordinate: Point(36.1575, -86.7838))
-        s1.addSleepLocation("Hotel Indigo", address: "301 Union St", nights: 1, coordinate: Point(36.1652, -86.7797))
+        s1.addSleepLocation("Hotel Indigo", address: "301 Union St", nights: "1", coordinate: Point(36.1652, -86.7797))
         s1.addViewLocation("12th & Porter", description: "Make reservations before going", address: "114 12th Ave N", coordinate: Point(36.1579, -86.7881))
         let s2 = travelLocation(stopName: "Grandma's House", coordinate: Point(35.60, -92.87))
         let s3 = travelLocation(city: "Salt Lake City", state: "UT", country: "USA", coordinate: Point(40.75, -111.94))
@@ -52,6 +54,7 @@ class MasterViewController: UITableViewController, UISearchBarDelegate {
         travelLocations.append(s3)
         
         self.refreshControl?.addTarget(self, action: "refreshTable", forControlEvents:UIControlEvents.ValueChanged)
+        s1.printLocations()
     }
 
     override func viewWillAppear(animated: Bool) {

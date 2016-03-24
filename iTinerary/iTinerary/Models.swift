@@ -55,7 +55,7 @@ struct sleepLocation {
     
     var name: String?
     var address: String?
-    var nights: Int?
+    var nights: String?
     var coordinate: Point
     var mapCoordinate: CLLocationCoordinate2D?
     
@@ -82,7 +82,7 @@ func ==(lhs: viewLocation, rhs: viewLocation) -> Bool {
 class viewAnnotation: NSObject, MKAnnotation {
     let title: String?
     let subtitle: String?
-    let locationName: String?
+    var locationName: String?
     let coordinate: CLLocationCoordinate2D
     
     
@@ -110,7 +110,7 @@ class viewAnnotation: NSObject, MKAnnotation {
 class sleepAnnotation: NSObject, MKAnnotation {
     let title: String?
     let subtitle: String?
-    let locationName: String?
+    var locationName: String?
     let coordinate: CLLocationCoordinate2D
     
     
@@ -204,7 +204,7 @@ class travelLocation {
         self.viewLocations.append(newViewLocation)
     }
     
-    func addSleepLocation(name: String, address: String? = nil, nights: Int, coordinate: Point) {
+    func addSleepLocation(name: String, address: String? = nil, nights: String, coordinate: Point) {
         
         let newSleepLocation = sleepLocation(name: name, address: address, nights: nights, coordinate:coordinate, mapCoordinate: convertPointToMapCoord(coordinate))
         self.sleepLocations.append(newSleepLocation)
@@ -212,7 +212,7 @@ class travelLocation {
     }
     
     
-    func addSleepLocation(name: String, address: String? = nil, nights: Int, mapCoordinate: CLLocationCoordinate2D) {
+    func addSleepLocation(name: String, address: String? = nil, nights: String, mapCoordinate: CLLocationCoordinate2D) {
         
         let newSleepLocation = sleepLocation(name: name, address: address, nights: nights, coordinate: Point(mapCoordinate.latitude, mapCoordinate.longitude), mapCoordinate: mapCoordinate)
         self.sleepLocations.append(newSleepLocation)

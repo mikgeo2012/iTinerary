@@ -10,21 +10,21 @@ import UIKit
 import MapKit
 import Contacts
 
-class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDelegate, UIPopoverPresentationControllerDelegate {
+class DetailViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
 
     // MARK: - Properties
     
     @IBOutlet var mapView: MKMapView?
+    @IBOutlet var tapGesture: UITapGestureRecognizer!
     
-    var searchController:UISearchController!
+    var locationManager = CLLocationManager()
+    
+    //var searchController:UISearchController!
     var localSearchRequest:MKLocalSearchRequest!
     var localSearch:MKLocalSearch!
     var localSearchResponse:MKLocalSearchResponse!
     var error:NSError!
-    var isNewSight: Bool = false
-    var isNewSleep: Bool = false
-    var newSleepNumNights = 0
-    var newSightDesc = ""
+
     
     var detailItem: travelLocation? {
         didSet {
@@ -54,19 +54,30 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
         
         }
     }
+    
+    func checkLocationAuthorizationStatus() {
+        if CLLocationManager.authorizationStatus() == .AuthorizedWhenInUse {
+            mapView!.showsUserLocation = true
+        } else {
+            locationManager.requestWhenInUseAuthorization()
+        }
+    }
 
     override func viewDidLoad() {
         
         super.viewDidLoad()
         self.configureView()
         // Do any additional setup after loading the view, typically from a nib.
-        var longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
-        longPress.minimumPressDuration = 0.8
-        mapView!.addGestureRecognizer(longPress)
+        /*let tap = UITapGestureRecognizer(target: self, action: "dropPin:")
+        tap.numberOfTapsRequired = 1
+        tap.numberOfTouchesRequired = 1
+        mapView?.addGestureRecognizer(tap)*/
         
+        
+        //tap.delegate = self
         self.mapView?.delegate = self
         self.mapView?.showsScale = true
-        
+        self.tapGesture.delegate = self
         
     }
     
@@ -74,7 +85,10 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
         super.viewDidAppear(animated)
         let value = UIInterfaceOrientation.LandscapeLeft.rawValue
         UIDevice.currentDevice().setValue(value, forKey: "orientation")
+        checkLocationAuthorizationStatus()
     }
+    
+    
     
     
     // MARK: - Methods
@@ -135,7 +149,7 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
             let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
                 self.isNewSleep = true
                 self.isNewSight = false
-                self.newSleepNumNights = Int(tfield.text!)!
+                self.newSleepNumNights = tfield.text!
                 self.presentViewController(self.searchController, animated: true, completion: nil)
             }
             newAlertController.addAction(newOKAction)
@@ -189,39 +203,13 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
         
         
         
-    }
+    }*/
     
-    */func dropPin(gestureRecognizer: UIGestureRecognizer) {
-        var touchPoint = gestureRecognizer.locationInView(self.mapView)
-        var newCoordinates = self.mapView!.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
-        print(newCoordinates)
-        
-        var addr = "No address found"
-        
-        CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoordinates.latitude, longitude: newCoordinates.longitude), completionHandler: {(placemarks, error) -> Void in
-            if error != nil {
-                print("Reverse geocoder failed with error" + error!.localizedDescription)
-                return
-            }
-            
-            if placemarks!.count > 0 {
-                let pm = placemarks![0]
-                
-                if (pm.thoroughfare != nil) && (pm.subThoroughfare != nil) {
-                    addr = pm.subThoroughfare! + " " + pm.thoroughfare!
-                } else if (pm.thoroughfare != nil) {
-                    addr = pm.thoroughfare!
-                }
-                
-                print(addr)
-            }
-            
-        
-        let annotation = viewAnnotation(title: "test", description: "test test", address: addr, coordinate: newCoordinates)
-        self.mapView!.addAnnotation(annotation)
-        })
-    }
-    /*
+    
+    
+    @IBAction func addLocation(sender: UITapGestureRecognizer) {
+        let tempCoords = sender.locationInView(self.mapView)
+        let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
         
         let alertController = UIAlertController(title: "New Point of Interest", message: "Select which type of location you are trying to add.", preferredStyle: .Alert)
         
@@ -252,12 +240,7 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
             }
             newAlertController.addAction(newCancelAction)
             let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
-                self.isNewSleep = false
-                self.isNewSight = true
-                self.newSightDesc = tfield.text!
-                
-                let tempCoords = gestureRecognizer.locationInView(self.mapView)
-                let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
+
                 
                 var addr = ""
                 
@@ -268,37 +251,33 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
                     }
                     
                     if placemarks!.count > 0 {
-                        let pm = placemarks![0] 
+                        let pm = placemarks![0]
                         
                         if (pm.thoroughfare != nil) && (pm.subThoroughfare != nil) {
                             addr = pm.subThoroughfare! + " " + pm.thoroughfare!
                         } else if (pm.thoroughfare != nil) {
                             addr = pm.thoroughfare!
-                        } else {
-                            addr = "No address found"
                         }
                         
-                        print(addr)
+                        print (addr)
+                        
                     }
-                    else {
-                        addr = "No address found"
-                    }
-                
+                    
+                    
+                    
                 })
                 
+                self.detailItem?.addViewLocation(tfield2.text!, description: tfield.text!, address: addr, mapCoordinate: newCoords!)
+                let annotation = viewAnnotation(title: tfield2.text!, description: tfield.text!, address: addr, coordinate: newCoords!)
+                self.mapView?.addAnnotation(annotation)
             
-            self.detailItem?.addViewLocation(tfield2.text!, description: tfield.text!, address: addr, mapCoordinate: newCoords!)
-                
-            let newAnnotation = viewAnnotation(title: tfield2.text!, description: tfield.text!, address: addr, coordinate: newCoords!)
-            self.addAnnotationToMap(newAnnotation)
-            //self.detailItem?.printLocations()
                 
             }
             newAlertController.addAction(newOKAction)
             self.presentViewController(newAlertController, animated: true, completion: nil)
         }
         alertController.addAction(SightAction)
-        
+            
         let SleepAction = UIAlertAction(title: "New Accommodation", style: .Default) { (action) in
             
             var tfield: UITextField!
@@ -322,9 +301,36 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
             }
             newAlertController.addAction(newCancelAction)
             let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
-                self.isNewSleep = true
-                self.isNewSight = false
-                self.newSleepNumNights = Int(tfield.text!)!
+
+                
+                var addr = ""
+                
+                CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoords!.latitude, longitude: newCoords!.longitude), completionHandler: {(placemarks, error) -> Void in
+                    if error != nil {
+                        print("Reverse geocoder failed with error" + error!.localizedDescription)
+                        return
+                    }
+                    
+                    if placemarks!.count > 0 {
+                        let pm = placemarks![0]
+                        
+                        if (pm.thoroughfare != nil) && (pm.subThoroughfare != nil) {
+                            addr = pm.subThoroughfare! + " " + pm.thoroughfare!
+                        } else if (pm.thoroughfare != nil) {
+                            addr = pm.thoroughfare!
+                        }
+                        
+                        
+                        
+                    }
+                    
+                    
+                    
+                })
+                print(addr)
+                self.detailItem?.addSleepLocation(tfield2.text!, address: addr, nights: tfield.text!, mapCoordinate: newCoords!)
+                let annotation = sleepAnnotation(title: tfield2.text!, nights: tfield.text!, address: addr, coordinate: newCoords!)
+                self.mapView?.addAnnotation(annotation)
                 
             }
             newAlertController.addAction(newOKAction)
@@ -334,44 +340,80 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
         alertController.addAction(SleepAction)
         
         presentViewController(alertController, animated: true, completion: nil)
-
+        
         
     }
     
-    func addFromTouch(gestureRecognizer: UIGestureRecognizer, annotation: MKAnnotation) {
-        let tapPoint: CGPoint = gestureRecognizer.locationInView(mapView)
-        let touchMapCoordinate: CLLocationCoordinate2D = mapView!.convertPoint(tapPoint, toCoordinateFromView: mapView)
+    
+    
+    /*func addSightAnnotationFromTouch(gestureRecognizer: UIGestureRecognizer, textFieldTitle: UITextField, textFieldDescription: UITextField) {
         
-        if UIGestureRecognizerState.Began == gestureRecognizer.state {
-            let pin = MKPointAnnotation()
-            pin.coordinate = touchMapCoordinate
-            mapView!.addAnnotation(pin)
-        }
+        let tempCoords = gestureRecognizer.locationInView(self.mapView)
+        let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
+        
+        var addr = self.findAddress(newCoords!)
+        
+        self.detailItem?.addViewLocation(textFieldTitle.text!, description: textFieldDescription.text!, address: addr, mapCoordinate: newCoords!)
+        
+        let newAnnotation = viewAnnotation(title: textFieldTitle.text!, description: textFieldDescription.text!, address: addr, coordinate: newCoords!)
+        
+        self.mapView!.addAnnotation(newAnnotation)
+        
+    }
+    
+    func TestaddSightAnnotationFromTouch(gestureRecognizer: UIGestureRecognizer, textFieldTitle: String, textFieldDescription: String) {
+        
+        let tempCoords = gestureRecognizer.locationInView(self.mapView)
+        let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
+        
+        var addr = self.findAddress(newCoords!)
+        
+        self.detailItem?.addViewLocation(textFieldTitle, description: textFieldDescription, address: addr, mapCoordinate: newCoords!)
+        
+        let newAnnotation = viewAnnotation(title: textFieldTitle, description: textFieldDescription, address: addr, coordinate: newCoords!)
+        
+        self.mapView!.addAnnotation(newAnnotation)
+        
+    }
+    
+    func addSleepAnnotationFromTouch(gestureRecognizer: UIGestureRecognizer, textFieldTitle: UITextField, textFieldDescription: UITextField) {
+        
+        let tempCoords = gestureRecognizer.locationInView(self.mapView)
+        let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
+        
+        var addr = self.findAddress(newCoords!)
+        
+        self.detailItem?.addSleepLocation(textFieldTitle.text!, address: addr, nights: textFieldDescription.text!, mapCoordinate: newCoords!)
+        
+        let newAnnotation = sleepAnnotation(title: textFieldTitle.text!, nights: textFieldDescription.text!, address: addr, coordinate: newCoords!)
+        
+        self.mapView!.addAnnotation(newAnnotation)
+        
+    }
+    
+    func TestaddSleepAnnotationFromTouch(gestureRecognizer: UIGestureRecognizer, textFieldTitle: String, textFieldDescription: String) {
+        
+        let tempCoords = gestureRecognizer.locationInView(self.mapView)
+        let newCoords = self.mapView?.convertPoint(tempCoords, toCoordinateFromView: self.mapView)
+        
+        var addr = self.findAddress(newCoords!)
+        
+        self.detailItem?.addSleepLocation(textFieldTitle, address: addr, nights: textFieldDescription, mapCoordinate: newCoords!)
+        
+        let newAnnotation = sleepAnnotation(title: textFieldTitle, nights: textFieldDescription, address: addr, coordinate: newCoords!)
+        
+        self.mapView!.addAnnotation(newAnnotation)
+        
     }*/
+    
     
     func centerMapOnRegion(location: CLLocationCoordinate2D, mapSpan: Double) {
         let tempSpan = MKCoordinateSpanMake(mapSpan, mapSpan)
         let coordRegion = MKCoordinateRegionMake(location, tempSpan)
-        mapView?.setRegion(coordRegion, animated: true)
+        self.mapView?.setRegion(coordRegion, animated: true)
     }
     
-    /*func fitMapViewToAnnotaionList() {
-        let mapEdgePadding = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-        var zoomRect:MKMapRect = MKMapRectNull
-        let annotationsCount = self.mapView!.annotations.count
-        for index in 0..<annotationsCount {
-            let annotation = self.mapView!.annotations[index]
-            let aPoint:MKMapPoint = MKMapPointForCoordinate(annotation.coordinate)
-            let rect:MKMapRect = MKMapRectMake(aPoint.x, aPoint.y, 0.1, 0.1)
-            
-            if MKMapRectIsNull(zoomRect) {
-                zoomRect = rect
-            } else {
-                zoomRect = MKMapRectUnion(zoomRect, rect)
-            }
-        }
-        self.setVisibleMapRect(zoomRect, edgePadding: mapEdgePadding, animated: true)
-    }*/
+    
     
     func addAnnotationsToMap(stop: travelLocation) -> Bool {
         let viewLocations = stop.viewLocations
@@ -384,38 +426,38 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
                     let annotation = viewAnnotation(title: v.name, description: v.description, address: v.address, coordinate: v.mapCoordinate!)
                     annotations.append(annotation)
                 }
-                mapView?.addAnnotations(annotations)
+                self.mapView?.addAnnotations(annotations)
             }
             
             if (!sleepLocations.isEmpty) {
                 var annotations = [MKAnnotation]()
                 for s in sleepLocations {
                     print(s.name)
-                    let annotation = sleepAnnotation(title: s.name!, nights: String(s.nights), address: s.address, coordinate: s.mapCoordinate!)
+                    let annotation = sleepAnnotation(title: s.name!, nights: s.nights!, address: s.address, coordinate: s.mapCoordinate!)
                     annotations.append(annotation)
                 }
-                mapView?.addAnnotations(annotations)
+                self.mapView?.addAnnotations(annotations)
             }
             return true
         }
         return false
     }
     
-    func addAnnotationToMap(annotation: MKAnnotation) -> Bool {
+    /*func addAnnotationToMap(annotation: MKAnnotation) -> Bool {
         if let viewAnn = annotation as? viewAnnotation {
             print(viewAnn.title)
-            mapView?.addAnnotation(viewAnn)
+            self.mapView?.addAnnotation(viewAnn)
             return true
         }
         
         if let sleepAnn = annotation as? sleepAnnotation {
             print(sleepAnn.title)
-            mapView?.addAnnotation(sleepAnn)
+            self.mapView?.addAnnotation(sleepAnn)
             return true
         }
         
         return false
-    }
+    }*/
     
     
     // MARK: - MKMapViewDelegation implementation
@@ -455,33 +497,65 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UISearchBarDele
             return nil
         }
         
-        
     }
-
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView,
-        calloutAccessoryControlTapped control: UIControl) {
-            if control == view.rightCalloutAccessoryView {
-                if let sightView = view.annotation as? viewAnnotation {
-                    let tempPoint = self.mapView?.convertCoordinate(sightView.coordinate, toPointToView: nil)
-                    let newOrigin = CGPoint(x: (tempPoint?.x)!, y: (tempPoint?.y)!+40)
-                    var newView = UILabel(frame: CGRect(origin: newOrigin, size: CGSize(width: 20, height: 20)))
-                    newView.text = sightView.locationName
-                    
-                    let addrViewController = UIViewController()
-                    addrViewController.modalPresentationStyle = .Popover
-                    addrViewController.view = newView
-                    addrViewController.preferredContentSize = CGSizeMake(20, 20)
-                    
-                    let popoverAddrViewController = addrViewController.popoverPresentationController
-                    popoverAddrViewController?.permittedArrowDirections = .Any
-                    popoverAddrViewController?.delegate = self
-                    self.navigationController?.pushViewController(addrViewController, animated: true)
-
-                }
+    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        if control == view.rightCalloutAccessoryView {
+            if let sightView = view.annotation as? viewAnnotation {
+                let tempPoint = self.mapView?.convertCoordinate(sightView.coordinate, toPointToView: nil)
                 
+                let newOrigin = CGPoint(x: 0, y: 20)
+                
+                let tempLabel = UILabel(frame: CGRectMake(50, -100, 120, 40))
+                tempLabel.backgroundColor = UIColor.whiteColor()
+                tempLabel.textColor = UIColor.blackColor()
+                tempLabel.alpha = 0.90
+                tempLabel.font = UIFont.boldSystemFontOfSize(12)
+                tempLabel.textAlignment = NSTextAlignment.Center
+                tempLabel.text = sightView.locationName
+                view.addSubview(tempLabel)
+
+            }
+        
+            if let sleepView = view.annotation as? sleepAnnotation {
+                let tempPoint = self.mapView?.convertCoordinate(sleepView.coordinate, toPointToView: nil)
+                
+                let newOrigin = CGPoint(x: 0, y: 20)
+                
+                let tempLabel = UILabel(frame: CGRectMake(50, -100, 120, 40))
+                tempLabel.backgroundColor = UIColor.whiteColor()
+                tempLabel.textColor = UIColor.blackColor()
+                tempLabel.alpha = 0.90
+                tempLabel.font = UIFont.boldSystemFontOfSize(12)
+                tempLabel.textAlignment = NSTextAlignment.Center
+                tempLabel.text = sleepView.locationName
+                view.addSubview(tempLabel)
             }
             
+        }
             
+    }
+    
+    
+    // MARK: - Update user position
+    func mapView(mapView: MKMapView, didUpdateUserLocation
+        userLocation: MKUserLocation) {
+            if(MKMapRectContainsPoint(mapView.visibleMapRect, MKMapPointForCoordinate((userLocation.location?.coordinate)!)))
+            {
+                mapView.centerCoordinate = userLocation.location!.coordinate
+            }
+            
+    }
+    
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer :UIGestureRecognizer) -> Bool {
+            return true
+    }
+    
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
+        if let tempView = touch.view as? MKAnnotationView {
+            return false
+        }
+        return true
     }
     
 }
