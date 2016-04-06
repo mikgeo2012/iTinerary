@@ -242,7 +242,7 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UIGestureRecogn
             let newOKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
 
                 
-                var addr = ""
+                var addr: String = ""
                 
                 CLGeocoder().reverseGeocodeLocation(CLLocation(latitude: newCoords!.latitude, longitude: newCoords!.longitude), completionHandler: {(placemarks, error) -> Void in
                     if error != nil {
@@ -259,17 +259,21 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UIGestureRecogn
                             addr = pm.thoroughfare!
                         }
                         
-                        print (addr)
+                        //print (addr)
+                        self.detailItem?.addViewLocation(tfield2.text!, description: tfield.text!, address: addr, mapCoordinate: newCoords!)
+                        let annotation = viewAnnotation(title: tfield2.text!, description: tfield.text!, address: addr, coordinate: newCoords!)
                         
+                        self.mapView?.addAnnotation(annotation)
                     }
                     
                     
                     
                 })
-                
+                /*print(addr)
                 self.detailItem?.addViewLocation(tfield2.text!, description: tfield.text!, address: addr, mapCoordinate: newCoords!)
                 let annotation = viewAnnotation(title: tfield2.text!, description: tfield.text!, address: addr, coordinate: newCoords!)
-                self.mapView?.addAnnotation(annotation)
+                
+                self.mapView?.addAnnotation(annotation)*/
             
                 
             }
@@ -320,17 +324,19 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UIGestureRecogn
                             addr = pm.thoroughfare!
                         }
                         
-                        
+                        self.detailItem?.addSleepLocation(tfield2.text!, address: addr, nights: tfield.text!, mapCoordinate: newCoords!)
+                        let annotation = sleepAnnotation(title: tfield2.text!, nights: tfield.text!, address: addr, coordinate: newCoords!)
+                        self.mapView?.addAnnotation(annotation)
                         
                     }
                     
                     
                     
                 })
-                print(addr)
+                /*print(addr)
                 self.detailItem?.addSleepLocation(tfield2.text!, address: addr, nights: tfield.text!, mapCoordinate: newCoords!)
                 let annotation = sleepAnnotation(title: tfield2.text!, nights: tfield.text!, address: addr, coordinate: newCoords!)
-                self.mapView?.addAnnotation(annotation)
+                self.mapView?.addAnnotation(annotation)*/
                 
             }
             newAlertController.addAction(newOKAction)
@@ -423,7 +429,7 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UIGestureRecogn
                 var annotations = [MKAnnotation]()
                 for v in viewLocations {
                     print(v.name)
-                    let annotation = viewAnnotation(title: v.name, description: v.description, address: v.address, coordinate: v.mapCoordinate!)
+                    let annotation = viewAnnotation(title: v.name, description: v.description, address: v.address!, coordinate: v.mapCoordinate!)
                     annotations.append(annotation)
                 }
                 self.mapView?.addAnnotations(annotations)
@@ -511,6 +517,7 @@ class DetailViewController: UIViewController, MKMapViewDelegate, UIGestureRecogn
                 tempLabel.alpha = 0.90
                 tempLabel.font = UIFont.boldSystemFontOfSize(12)
                 tempLabel.textAlignment = NSTextAlignment.Center
+                print(sightView.locationName)
                 tempLabel.text = sightView.locationName
                 view.addSubview(tempLabel)
 

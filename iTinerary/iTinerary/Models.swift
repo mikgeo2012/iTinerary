@@ -86,7 +86,7 @@ class viewAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     
     
-    init(title: String, description subtitle: String, address locationName: String?=nil, coordinate: CLLocationCoordinate2D) {
+    init(title: String, description subtitle: String, address locationName: String, coordinate: CLLocationCoordinate2D) {
         self.title = title
         self.locationName = locationName
         self.coordinate = coordinate

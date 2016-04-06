@@ -80,11 +80,11 @@
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Start:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8ib-eW-xlm">
                                     <rect key="frame" x="13" y="0.0" width="295" height="37"/>
                                     <fontDescription key="fontDescription" name="Kailasa" family="Kailasa" pointSize="20"/>
-                                    <color key="textColor" red="0.021376224951628227" green="0.63952608398834077" blue="0.78439503205128203" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="textColor" red="0.18095855513791395" green="0.7299278846153846" blue="0.036409333300533239" alpha="1" colorSpace="calibratedRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                             </subviews>
-                            <color key="backgroundColor" red="0.45710983056826943" green="0.84881810897435894" blue="0.81948466191819169" alpha="0.61637931034482762" colorSpace="calibratedRGB"/>
+                            <color key="backgroundColor" red="0.45878707819629577" green="0.85232371794871797" blue="0.82836899327223457" alpha="0.36524784482758621" colorSpace="calibratedRGB"/>
                             <constraints>
                                 <constraint firstItem="8ib-eW-xlm" firstAttribute="top" secondItem="ecv-oF-NVg" secondAttribute="topMargin" id="0NZ-yz-5A1"/>
                                 <constraint firstItem="8ib-eW-xlm" firstAttribute="leading" secondItem="ecv-oF-NVg" secondAttribute="leading" constant="15" id="Gmv-u6-Ozz"/>
@@ -109,7 +109,6 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
-                                <color key="backgroundColor" red="0.85130920016353784" green="1" blue="0.82621065259714932" alpha="1" colorSpace="calibratedRGB"/>
                                 <color key="tintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
                                     <segue destination="vC3-pB-5Vb" kind="showDetail" identifier="showDetail" id="6S0-TO-JiA"/>
