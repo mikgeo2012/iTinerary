@@ -1,4 +1,4 @@
-# mpcs51030-2016-winter-project-mikgeo2012
+# iOS App - iTinerary
 
 How to use:
 
